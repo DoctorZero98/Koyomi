@@ -192,6 +192,10 @@ body {
     gap: 0.5rem;
 }
 
+.sync-actions.secondary {
+    margin-top: -0.3rem;
+}
+
 .btn-sync {
     flex: 1;
     font-size: 0.75rem;
@@ -205,8 +209,27 @@ body {
     font-family: var(--font-gothic);
 }
 
+.btn-sync-alt {
+    flex: 1;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.2rem;
+    cursor: pointer;
+    background: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    transition: all 0.3s;
+    font-family: var(--font-gothic);
+}
+
 .btn-sync:hover {
     filter: brightness(1.2);
+    transform: translateY(-1px);
+}
+
+.btn-sync-alt:hover {
+    background: var(--accent-color);
+    color: white;
     transform: translateY(-1px);
 }
 
@@ -223,6 +246,25 @@ body {
 
 .sync-status.error {
     color: #c94042;
+}
+
+.sync-status.syncing {
+    animation: pulse 1.5s infinite;
+    color: var(--accent-color);
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
 }
 
 /* Calendar Main */

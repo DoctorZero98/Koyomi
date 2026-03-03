@@ -26,6 +26,9 @@ class JapaneseCalendar {
 
         // Start Intro Animation
         this.playIntroAnimation();
+
+        // Initial Auto-Sync
+        this.autoSync();
     }
 
     migrateData() {
@@ -1417,6 +1420,36 @@ class JapaneseCalendar {
     saveData() {
         localStorage.setItem('koyomi_categories', JSON.stringify(this.categories));
         localStorage.setItem('koyomi_events', JSON.stringify(this.events));
+
+        // Auto-upload whenever data is saved
+        this.triggerAutoUpload();
+    }
+
+    // Debounced upload to avoid too many requests
+    triggerAutoUpload() {
+        if (this.uploadTimeout) clearTimeout(this.uploadTimeout);
+        this.uploadTimeout = setTimeout(() => {
+            if (this.syncKeyInput.value.trim()) {
+                this.handleUpload(true); // silent=true
+            }
+        }, 2000);
+    }
+
+    async autoSync() {
+        // Load key from storage
+        const savedKey = localStorage.getItem('koyomi_sync_key');
+        if (savedKey) {
+            this.syncKeyInput.value = savedKey;
+            // Initial download to get latest from cloud
+            await this.handleDownload(true); // silent=true
+        }
+
+        // Auto-refresh when tab becomes active
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && this.syncKeyInput.value.trim()) {
+                this.handleDownload(true);
+            }
+        });
     }
 
     // --- Intro Animation: Triple Shoji Reveal ---
@@ -1476,14 +1509,16 @@ class JapaneseCalendar {
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
     }
 
-    async handleUpload() {
+    async handleUpload(silent = false) {
         const key = this.syncKeyInput.value.trim();
         if (!key) {
-            alert('同期キーを入力してください。');
+            if (!silent) alert('同期キーを入力してください。');
             return;
         }
 
-        this.updateSyncStatus('保存中...');
+        if (!silent) this.updateSyncStatus('保存中...', 'syncing');
+        else this.syncStatus.classList.add('syncing');
+
         localStorage.setItem('koyomi_sync_key', key);
 
         try {
@@ -1502,27 +1537,31 @@ class JapaneseCalendar {
             });
 
             if (response.ok) {
-                this.updateSyncStatus('保存完了', 'success');
+                this.updateSyncStatus('同期済み', 'success');
             } else {
                 throw new Error('Server error');
             }
         } catch (error) {
             console.error('Upload Error:', error);
             this.updateSyncStatus('保存失敗', 'error');
-            alert(`ネットワーク保存に失敗しました。下の「ファイルへ保存」ボタンを使えば、確実にバックアップをとることができます。`);
+            if (!silent) alert(`ネットワーク保存に失敗しました。下の「ファイルへ保存」ボタンを使えば、確実にバックアップをとることができます。`);
+        } finally {
+            this.syncStatus.classList.remove('syncing');
         }
     }
 
-    async handleDownload() {
+    async handleDownload(silent = false) {
         const key = this.syncKeyInput.value.trim();
         if (!key) {
-            alert('同期キーを入力してください。');
+            if (!silent) alert('同期キーを入力してください。');
             return;
         }
 
-        if (!confirm('クラウドのデータで現在の予定を上書きしますか？')) return;
+        if (!silent && !confirm('クラウドのデータで現在の予定を上書きしますか？')) return;
 
-        this.updateSyncStatus('読み込み中...');
+        if (!silent) this.updateSyncStatus('同期中...', 'syncing');
+        else this.syncStatus.classList.add('syncing');
+
         localStorage.setItem('koyomi_sync_key', key);
 
         try {
@@ -1531,28 +1570,31 @@ class JapaneseCalendar {
 
             if (response.status === 404) {
                 this.updateSyncStatus('未保存', 'error');
-                alert('まだデータが保存されていないか、キーが間違っています。');
+                if (!silent) alert('まだデータが保存されていないか、キーが間違っています。');
                 return;
             }
 
             if (response.ok) {
                 const data = await response.json();
                 if (data && data.categories && data.events) {
+                    // Simple check: Only overwrite if remote data is newer or local is empty
+                    // For now, let's keep it simple as requested: "Open and it's latest"
                     this.categories = data.categories;
                     this.events = data.events;
-                    this.saveData();
+                    localStorage.setItem('koyomi_categories', JSON.stringify(this.categories));
+                    localStorage.setItem('koyomi_events', JSON.stringify(this.events));
                     this.render();
                     this.updateSyncStatus('同期完了', 'success');
-                } else {
-                    throw new Error('Invalid format');
                 }
-            } else {
-                throw new Error('Network error');
             }
         } catch (error) {
             console.error('Download Error:', error);
-            this.updateSyncStatus('同期失敗', 'error');
-            alert(`データの取得に失敗しました。キーが正しいか確認するか、保存済みファイルの読み込みをお試しください。`);
+            if (!silent) {
+                this.updateSyncStatus('同期失敗', 'error');
+                alert(`データの取得に失敗しました。`);
+            }
+        } finally {
+            this.syncStatus.classList.remove('syncing');
         }
     }
 
