@@ -1489,8 +1489,9 @@ class JapaneseCalendar {
                 updatedAt: new Date().toISOString()
             };
 
-            const response = await fetch(`https://api.keyvalue.xyz/${token}/koyomi`, {
-                method: 'POST',
+            const bucketId = 'koyomi_v1_sync_6k8p2';
+            const response = await fetch(`https://kvdb.io/${bucketId}/${token}`, {
+                method: 'PUT',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -1499,12 +1500,12 @@ class JapaneseCalendar {
                 this.updateSyncStatus('保存完了', 'success');
             } else {
                 const errText = await response.text();
-                throw new Error(`保存に失敗しました: ${errText}`);
+                throw new Error(`エラー: ${response.status} ${errText}`);
             }
         } catch (error) {
             console.error('Upload Error:', error);
-            this.updateSyncStatus('保存エラーが発生しました', 'error');
-            alert('保存に失敗しました。ネットワーク状況を確認してください。');
+            this.updateSyncStatus('保存エラー', 'error');
+            alert(`保存に失敗しました：${error.message}\n通信環境や同期キーを確認してください。`);
         }
     }
 
@@ -1522,11 +1523,12 @@ class JapaneseCalendar {
 
         try {
             const token = await this.getSyncToken(key);
-            const response = await fetch(`https://api.keyvalue.xyz/${token}/koyomi`);
+            const bucketId = 'koyomi_v1_sync_6k8p2';
+            const response = await fetch(`https://kvdb.io/${bucketId}/${token}`);
 
             if (response.status === 404) {
-                this.updateSyncStatus('データが見つかりません', 'error');
-                alert('入力されたキーに関連付けられたデータが見つかりません。');
+                this.updateSyncStatus('未保存', 'error');
+                alert('この同期キーには、保存されたデータが見つかりませんでした。');
                 return;
             }
 
@@ -1542,12 +1544,12 @@ class JapaneseCalendar {
                     throw new Error('データの形式が正しくありません');
                 }
             } else {
-                throw new Error('読み込みに失敗しました');
+                throw new Error(`エラー: ${response.status}`);
             }
         } catch (error) {
             console.error('Download Error:', error);
-            this.updateSyncStatus('エラーが発生しました', 'error');
-            alert('同期データの読み込みに失敗しました。');
+            this.updateSyncStatus('エラー', 'error');
+            alert(`読み込みに失敗しました：${error.message}`);
         }
     }
 }
