@@ -91,6 +91,8 @@ class JapaneseCalendar {
         this.syncKeyInput = document.getElementById('sync-key');
         this.uploadBtn = document.getElementById('upload-btn');
         this.downloadBtn = document.getElementById('download-btn');
+        this.exportBtn = document.getElementById('export-btn');
+        this.importBtn = document.getElementById('import-btn');
         this.syncStatus = document.getElementById('sync-status');
     }
 
@@ -165,6 +167,8 @@ class JapaneseCalendar {
         // Sync Event Listeners
         this.uploadBtn.addEventListener('click', () => this.handleUpload());
         this.downloadBtn.addEventListener('click', () => this.handleDownload());
+        this.exportBtn.addEventListener('click', () => this.handleExport());
+        this.importBtn.addEventListener('click', () => this.handleImport());
 
         // Load sync key from local storage if exists
         const savedKey = localStorage.getItem('koyomi_sync_key');
@@ -476,7 +480,7 @@ class JapaneseCalendar {
                 const dayIndex = (dayOfWeek + 6) % 7; // Mon=0 .. Sun=6
 
                 // Effective end of this row is Sunday (Index 6)
-                // How many days left in this week? (6 - dayIndex) + 1 (include today)
+                // How many days left in this week? (7 - dayIndex)
                 const daysLeftInWeek = 7 - dayIndex;
 
                 // How many days left in event?
@@ -1459,17 +1463,17 @@ class JapaneseCalendar {
     // --- Cloud Synchronization ---
 
     updateSyncStatus(msg, type = '') {
-        this.syncStatus.textContent = msg + (msg === '未同期' ? '' : ' (v1.1)');
+        this.syncStatus.textContent = msg + (msg === '未同期' ? '' : ' (v1.2)');
         this.syncStatus.className = `sync-status ${type}`;
     }
 
     // Generate a unique token from the secret key for secure storage
     async getSyncToken(key) {
-        const msgBuffer = new TextEncoder().encode(key + "_koyomi_v1_salt");
+        const msgBuffer = new TextEncoder().encode(key + "_koyomi_v2_salt");
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        // Use a 16-char hex string as the storage ID
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
+        // Use a 32-char hex string as the storage ID
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
     }
 
     async handleUpload() {
@@ -1490,9 +1494,9 @@ class JapaneseCalendar {
                 updatedAt: new Date().toISOString()
             };
 
-            // Using api.jsonstorage.net: Simple, stable, and requires no pre-registration
-            const response = await fetch(`https://api.jsonstorage.net/v1/json/00000000-0000-0000-0000-000000000000/${token}`, {
-                method: 'PUT',
+            // Using npoint.io: A very reliable and simple JSON bin service
+            const response = await fetch(`https://api.npoint.io/${token.substring(0, 20)}`, {
+                method: 'POST',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -1500,13 +1504,12 @@ class JapaneseCalendar {
             if (response.ok) {
                 this.updateSyncStatus('保存完了', 'success');
             } else {
-                const errText = await response.text();
-                throw new Error(errText || 'Server error');
+                throw new Error('Server error');
             }
         } catch (error) {
             console.error('Upload Error:', error);
             this.updateSyncStatus('保存失敗', 'error');
-            alert(`保存に失敗しました。サイト全体を再読み込みして、もう一度お試しください。\nエラー内容: ${error.message}`);
+            alert(`ネットワーク保存に失敗しました。下の「ファイルへ保存」ボタンを使えば、確実にバックアップをとることができます。`);
         }
     }
 
@@ -1524,7 +1527,7 @@ class JapaneseCalendar {
 
         try {
             const token = await this.getSyncToken(key);
-            const response = await fetch(`https://api.jsonstorage.net/v1/json/00000000-0000-0000-0000-000000000000/${token}`);
+            const response = await fetch(`https://api.npoint.io/${token.substring(0, 20)}`);
 
             if (response.status === 404) {
                 this.updateSyncStatus('未保存', 'error');
@@ -1541,16 +1544,62 @@ class JapaneseCalendar {
                     this.render();
                     this.updateSyncStatus('同期完了', 'success');
                 } else {
-                    throw new Error('データの形式が正しくありません');
+                    throw new Error('Invalid format');
                 }
             } else {
-                throw new Error('通信エラーが発生しました');
+                throw new Error('Network error');
             }
         } catch (error) {
             console.error('Download Error:', error);
             this.updateSyncStatus('同期失敗', 'error');
-            alert(`データの取得に失敗しました。\nエラー内容: ${error.message}`);
+            alert(`データの取得に失敗しました。キーが正しいか確認するか、保存済みファイルの読み込みをお試しください。`);
         }
+    }
+
+    // --- File Backup Strategy (100% Guaranteed) ---
+    handleExport() {
+        const data = {
+            categories: this.categories,
+            events: this.events,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `koyomi_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.updateSyncStatus('書き出し完了', 'success');
+    }
+
+    handleImport() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data && data.categories && data.events) {
+                        this.categories = data.categories;
+                        this.events = data.events;
+                        this.saveData();
+                        this.render();
+                        this.updateSyncStatus('読み込み完了', 'success');
+                        alert('データを読み込みました。');
+                    } else {
+                        alert('ファイル形式が正しくありません。');
+                    }
+                } catch (err) {
+                    alert('ファイルの読み込みに失敗しました。');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
     }
 }
 
