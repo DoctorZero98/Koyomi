@@ -1459,7 +1459,7 @@ class JapaneseCalendar {
     // --- Cloud Synchronization ---
 
     updateSyncStatus(msg, type = '') {
-        this.syncStatus.textContent = msg;
+        this.syncStatus.textContent = msg + (msg === '未同期' ? '' : ' (v1.1)');
         this.syncStatus.className = `sync-status ${type}`;
     }
 
@@ -1468,7 +1468,8 @@ class JapaneseCalendar {
         const msgBuffer = new TextEncoder().encode(key + "_koyomi_v1_salt");
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
+        // Use a 16-char hex string as the storage ID
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
     }
 
     async handleUpload() {
@@ -1489,8 +1490,8 @@ class JapaneseCalendar {
                 updatedAt: new Date().toISOString()
             };
 
-            const bucketId = 'koyomi_v1_sync_6k8p2';
-            const response = await fetch(`https://kvdb.io/${bucketId}/${token}`, {
+            // Using api.jsonstorage.net: Simple, stable, and requires no pre-registration
+            const response = await fetch(`https://api.jsonstorage.net/v1/json/00000000-0000-0000-0000-000000000000/${token}`, {
                 method: 'PUT',
                 body: JSON.stringify(data),
                 headers: { 'Content-Type': 'application/json' }
@@ -1500,12 +1501,12 @@ class JapaneseCalendar {
                 this.updateSyncStatus('保存完了', 'success');
             } else {
                 const errText = await response.text();
-                throw new Error(`エラー: ${response.status} ${errText}`);
+                throw new Error(errText || 'Server error');
             }
         } catch (error) {
             console.error('Upload Error:', error);
-            this.updateSyncStatus('保存エラー', 'error');
-            alert(`保存に失敗しました：${error.message}\n通信環境や同期キーを確認してください。`);
+            this.updateSyncStatus('保存失敗', 'error');
+            alert(`保存に失敗しました。サイト全体を再読み込みして、もう一度お試しください。\nエラー内容: ${error.message}`);
         }
     }
 
@@ -1523,12 +1524,11 @@ class JapaneseCalendar {
 
         try {
             const token = await this.getSyncToken(key);
-            const bucketId = 'koyomi_v1_sync_6k8p2';
-            const response = await fetch(`https://kvdb.io/${bucketId}/${token}`);
+            const response = await fetch(`https://api.jsonstorage.net/v1/json/00000000-0000-0000-0000-000000000000/${token}`);
 
             if (response.status === 404) {
                 this.updateSyncStatus('未保存', 'error');
-                alert('この同期キーには、保存されたデータが見つかりませんでした。');
+                alert('まだデータが保存されていないか、キーが間違っています。');
                 return;
             }
 
@@ -1539,17 +1539,17 @@ class JapaneseCalendar {
                     this.events = data.events;
                     this.saveData();
                     this.render();
-                    this.updateSyncStatus('読み込み完了', 'success');
+                    this.updateSyncStatus('同期完了', 'success');
                 } else {
                     throw new Error('データの形式が正しくありません');
                 }
             } else {
-                throw new Error(`エラー: ${response.status}`);
+                throw new Error('通信エラーが発生しました');
             }
         } catch (error) {
             console.error('Download Error:', error);
-            this.updateSyncStatus('エラー', 'error');
-            alert(`読み込みに失敗しました：${error.message}`);
+            this.updateSyncStatus('同期失敗', 'error');
+            alert(`データの取得に失敗しました。\nエラー内容: ${error.message}`);
         }
     }
 }
