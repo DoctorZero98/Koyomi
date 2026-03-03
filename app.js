@@ -81,6 +81,9 @@ class JapaneseCalendar {
         this.dayDetailList = document.getElementById('day-detail-list');
         this.dayDetailAddBtn = document.getElementById('day-detail-add-btn');
 
+        // Multi-day elements
+        this.multiDayToggle = document.getElementById('multi-day-toggle');
+        this.dateRangeContainer = document.getElementById('date-range-container');
         this.startDateInput = document.getElementById('event-start-date');
         this.endDateInput = document.getElementById('event-end-date');
 
