@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>和風カレンダー</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="intro-overlay" class="intro-overlay">
+        <div class="shoji-container">
+            <div class="shoji shoji-left">
+                <div class="shoji-window"></div>
+                <div class="yumeari-container">
+                    <img src="shoji_deco_left.png" alt="Shoji Decoration" class="yumeari-image-left">
+                </div>
+            </div>
+            <div class="shoji shoji-right">
+                <div class="shoji-window"></div>
+                <div class="yumeari-container">
+                    <img src="shoji_deco.png" alt="Shoji Decoration" class="yumeari-image-right">
+                </div>
+            </div>
+        </div>
+        <div id="intro-garden-bg" class="intro-garden-bg">
+            <div class="night-sky"></div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="nav-row">
+                    <button id="prev-month" class="nav-btn">〈</button>
+                    <button id="next-month" class="nav-btn">〉</button>
+                </div>
+                <h2 id="current-month-display" class="sidebar-date-display">2026年 2月</h2>
+            </div>
+
+            <div class="category-section">
+                <h2>区分設定</h2>
+                <ul id="category-list" class="category-list">
+                    <!-- Categories will be injected here via JS -->
+                </ul>
+                <button id="add-category-btn" class="btn-text">＋ 新しい区分を追加</button>
+            </div>
+
+            <div class="sync-section">
+                <h2>同期設定</h2>
+                <div class="sync-box">
+                    <input type="password" id="sync-key" placeholder="同期キーを入力">
+                    <div class="sync-actions">
+                        <button id="upload-btn" class="btn-sync" title="PCからクラウドへ保存">クラウドへ保存</button>
+                        <button id="download-btn" class="btn-sync" title="クラウドからデータを取得">データを取得</button>
+                    </div>
+                    <p class="sync-status" id="sync-status">未同期</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="calendar-container">
+            <!-- Header removed, moved to sidebar -->
+
+            <div class="calendar-grid-header">
+                <div>月</div>
+                <div>火</div>
+                <div>水</div>
+                <div>木</div>
+                <div>金</div>
+                <div>土</div>
+                <div>日</div>
+            </div>
+            <div id="calendar-grid" class="calendar-grid">
+                <!-- Days will be injected here via JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for adding events -->
+    <div id="event-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="back-modal hidden" id="back-event-modal">&#10094;</span>
+            <span class="close-modal" id="close-event-modal">&times;</span>
+            <h3 id="modal-date-title">予定を作成</h3>
+            <form id="event-form">
+                <input type="hidden" id="event-edit-id">
+                <input type="text" id="event-title" placeholder="予定のタイトル" required>
+
+                <div class="form-group multi-day-toggle-group">
+                    <label class="toggle-label">
+                        <span>複数日にわたる予定</span>
+                        <input type="checkbox" id="multi-day-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div id="date-range-container" class="form-group hidden">
+                    <div class="date-input-row">
+                        <div class="date-input-field">
+                            <label>開始日</label>
+                            <input type="text" id="event-start-date" readonly placeholder="開始日を選択">
+                        </div>
+                        <span class="date-range-separator">～</span>
+                        <div class="date-input-field">
+                            <label>終了日</label>
+                            <input type="text" id="event-end-date" readonly placeholder="終了日を選択">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>区分</label>
+                    <select id="event-category-select"></select>
+                </div>
+                <div class="form-group">
+                    <label>詳細</label>
+                    <textarea id="event-desc" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">保存</button>
+                    <button type="button" id="delete-event-btn" class="btn-danger hidden">削除</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing categories -->
+    <div id="category-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-cat-modal">&times;</span>
+            <h3 id="cat-modal-title">区分設定</h3>
+            <form id="category-form">
+                <input type="hidden" id="cat-edit-id"> <!-- For editing existing -->
+                <div class="form-group">
+                    <label>区分名</label>
+                    <input type="text" id="cat-name" placeholder="例：仕事、旅行など" required>
+                </div>
+                <div class="form-group">
+                    <label>色を選択</label>
+                    <div id="color-presets" class="color-presets-grid">
+                        <!-- Presets injected via JS -->
+                    </div>
+                    <input type="hidden" id="cat-color" required>
+                </div>
+                <button type="submit" class="btn-primary" id="save-cat-btn">保存する</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Day Details -->
+    <div id="day-detail-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" id="close-day-modal">&times;</span>
+            <h3 id="day-detail-title"></h3>
+            <div id="day-detail-list" class="day-detail-list">
+                <!-- Events injected here -->
+            </div>
+            <button id="day-detail-add-btn" class="btn-primary">この日に予定を追加</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

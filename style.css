@@ -1,0 +1,1228 @@
+:root {
+    /* Japanese Chic Color Palette */
+    --bg-color: #fcfaf2;
+    /* 生成り色 (Ecru/Washi) */
+    --text-color: #3e312b;
+    /* 焦茶 (Dark Brown/Sephia) */
+    --sidebar-bg: #ece6d9;
+    /* 薄卵色 dimmed */
+    --accent-color: #8d3034;
+    /* 蘇芳 (Deep Red) */
+    --grid-line: #dcd3b9;
+
+    /* Category Colors Default */
+    --cat-work: #384d98;
+    /* 藍色 */
+    --cat-personal: #6f7c46;
+    /* 苔色 */
+    --cat-impt: #c94042;
+    /* 紅色 */
+
+    --font-mincho: 'Shippori Mincho', serif;
+    --font-gothic: 'Zen Maru Gothic', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-gothic);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 280px;
+    background-color: var(--sidebar-bg);
+    padding: 2rem;
+    border-right: 1px solid var(--grid-line);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.sidebar-header {
+    margin-bottom: 1rem;
+}
+
+.nav-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-date-display {
+    font-family: var(--font-mincho);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+}
+
+.app-title {
+    font-family: var(--font-mincho);
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+    letter-spacing: 0.1em;
+}
+
+.category-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    /* Important for flex child overflow */
+}
+
+.category-section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid var(--grid-line);
+    padding-bottom: 0.5rem;
+    font-family: var(--font-mincho);
+}
+
+.category-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Custom Scrollbar for Sidebar */
+.category-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+    background-color: var(--grid-line);
+    border-radius: 3px;
+}
+
+.category-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.category-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    padding: 0.45rem;
+    /* Reduced height by 10% */
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    transition: background 0.3s;
+}
+
+.category-item:hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.color-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #ccc;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    margin-top: 1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.7;
+}
+
+.btn-text:hover {
+    opacity: 1;
+}
+
+/* Sync Section */
+.sync-section {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 2px solid var(--grid-line);
+}
+
+.sync-section h2 {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    font-family: var(--font-mincho);
+}
+
+.sync-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+#sync-key {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    margin-bottom: 0;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.sync-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sync {
+    flex: 1;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.2rem;
+    cursor: pointer;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    font-family: var(--font-gothic);
+}
+
+.btn-sync:hover {
+    filter: brightness(1.2);
+    transform: translateY(-1px);
+}
+
+.sync-status {
+    font-size: 0.7rem;
+    text-align: center;
+    color: #888;
+    margin-top: -0.2rem;
+}
+
+.sync-status.success {
+    color: #4c7346;
+}
+
+.sync-status.error {
+    color: #c94042;
+}
+
+/* Calendar Main */
+.calendar-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 2rem 2rem 2rem;
+    /* Reduced top padding since header is gone */
+}
+
+.nav-btn {
+    background: none;
+    border: 1px solid var(--text-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+    border-color: var(--accent-color);
+}
+
+.calendar-grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: var(--accent-color);
+    font-family: var(--font-mincho);
+}
+
+.calendar-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    /* Force fixed width */
+    grid-template-rows: repeat(5, 1fr);
+    /* Fixed 5 weeks for now as requested */
+    gap: 1px;
+    background-color: var(--grid-line);
+    border: 1px solid var(--grid-line);
+}
+
+.calendar-day {
+    background-color: #fffaf0;
+    /* Match shoji Washi for seamless look */
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid transparent;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    z-index: 1;
+}
+
+.calendar-day:hover {
+    background-color: #fff;
+    z-index: 2;
+    /* Float above neighbors if needed, though dragging handles opacity */
+}
+
+.calendar-day.other-month {
+    color: #aaa;
+}
+
+/* .day-number style replaced by .date-badge */
+.date-badge {
+    font-family: var(--font-mincho);
+    font-size: 0.8rem;
+    font-weight: bold;
+    width: 26px;
+    /* Slightly larger for moon visuals */
+    height: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: transparent;
+    /* Background handled by moon phases */
+    color: var(--text-color) !important;
+    /* Force black/dark text for all phases */
+    margin-bottom: 2px;
+    align-self: flex-start;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Lunar Phase Base Styles */
+.date-badge::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    z-index: -1;
+    background-color: #f2dc6d;
+    /* Requested Moonlight Yellow */
+    transition: transform 0.4s ease, background-color 0.4s ease;
+}
+
+/* 0: 新月 (New Moon) - Return to transparent background as requested */
+.date-badge[data-moon-phase="0"] {
+    border: none !important;
+    /* No border even on Today */
+    box-shadow: none !important;
+}
+
+.date-badge[data-moon-phase="0"]::before {
+    background-color: transparent;
+}
+
+/* 4: 満月 (Full Moon) - Bright golden moon */
+.date-badge[data-moon-phase="4"]::before {
+    background-color: #f2dc6d;
+    box-shadow: 0 0 8px rgba(242, 220, 109, 0.4);
+}
+
+/* 8 Named Phases Logic:
+   1: 三日月 (Waxing Crescent)
+   2: 上弦の月 (First Quarter)
+   3: 十三夜の月 (Waxing Gibbous)
+   5: 更待月 (Waning Gibbous)
+   6: 下弦の月 (Last Quarter)
+   7: 有明月 (Waning Crescent)
+*/
+
+.date-badge[data-moon-phase="1"]::after,
+.date-badge[data-moon-phase="2"]::after,
+.date-badge[data-moon-phase="3"]::after,
+.date-badge[data-moon-phase="5"]::after,
+.date-badge[data-moon-phase="6"]::after,
+.date-badge[data-moon-phase="7"]::after {
+    content: "";
+    position: absolute;
+    top: -10%;
+    width: 100%;
+    height: 120%;
+    border-radius: 50%;
+    background-color: #fffaf0;
+    /* Washi background to 'carve' the moon */
+    z-index: -1;
+}
+
+/* 1: 三日月 (Waxing Crescent - Right edge illuminated) */
+.date-badge[data-moon-phase="1"]::after {
+    left: -45%;
+}
+
+/* 2: 上弦の月 (First Quarter - Right half illuminated) */
+.date-badge[data-moon-phase="2"]::after {
+    left: -50%;
+    border-radius: 0;
+}
+
+/* 3: 十三夜の月 (Waxing Gibbous - Most of right illuminated) */
+.date-badge[data-moon-phase="3"]::after {
+    left: -65%;
+    transform: scale(0.8, 1.1);
+}
+
+/* 5: 更待月 (Waning Gibbous - Most of left illuminated) */
+.date-badge[data-moon-phase="5"]::after {
+    right: -65%;
+    transform: scale(0.8, 1.1);
+}
+
+/* 6: 下弦の月 (Last Quarter - Left half illuminated) */
+.date-badge[data-moon-phase="6"]::after {
+    right: -50%;
+    border-radius: 0;
+}
+
+/* 7: 有明月 (Waning Crescent - Left edge illuminated) */
+.date-badge[data-moon-phase="7"]::after {
+    right: -45%;
+}
+
+.date-badge:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.date-badge.today {
+    border: 2px solid var(--accent-color);
+    font-weight: 900;
+    color: #900820 !important;
+    /* Specific red for today's date */
+}
+
+/* Event Marker Styling for Multi-day */
+.event-marker {
+    font-size: 0.7rem;
+    /* Smaller font */
+    padding: 0 4px;
+    /* Adjust padding */
+    border-radius: 3px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 1px;
+    /* Tighter margin */
+    position: relative;
+    /* For handles */
+    cursor: move;
+    /* Changed from pointer to move for the whole bar */
+    user-select: none;
+    transition: box-shadow 0.2s;
+    height: 19px;
+    /* Reduced height from 22px */
+    line-height: 19px;
+    /* Vertically center text */
+    box-sizing: border-box;
+    /* Include padding/border in height */
+}
+
+.event-marker.visual-start {
+    z-index: 10;
+    /* Changed from visible to hidden to ensure text fits inside */
+    overflow: hidden;
+}
+
+.event-marker.placeholder {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.event-marker.dragging-main {
+    opacity: 0.5;
+    transform: scale(0.98);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+/* Continuations */
+.event-continues-right {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-right: -0.6rem;
+    /* Extend to edge of cell padding */
+    padding-right: 10px;
+    z-index: 10;
+}
+
+.event-continues-left {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: -0.6rem;
+    /* Extend to edge of cell padding */
+    padding-left: 10px;
+}
+
+/* Resize Handles */
+.resize-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 15px;
+    /* Wider hit area */
+    cursor: col-resize;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    z-index: 20;
+    /* Above marker text/content */
+}
+
+/* Visual cue on hover */
+.event-marker:hover .resize-handle {
+    opacity: 0.5;
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.resize-handle:hover {
+    background-color: rgba(255, 255, 255, 0.7);
+    opacity: 1 !important;
+}
+
+.handle-left {
+    left: 0;
+}
+
+.handle-right {
+    right: 0;
+}
+
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none;
+}
+
+.modal-content {
+    background-color: var(--bg-color);
+    padding: 3rem 2rem 2rem 2rem;
+    /* Increased top padding */
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+    border: 1px solid var(--grid-line);
+}
+
+.modal-content h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.close-modal {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.close-modal:hover {
+    color: var(--accent-color);
+}
+
+.back-modal {
+    position: absolute;
+    top: 1.2rem;
+    left: 1.5rem;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0ede4;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--text-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.back-modal:hover {
+    background-color: var(--accent-color);
+    color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Multi-day Toggle Switch */
+.multi-day-toggle-group {
+    margin: 0.75rem 0;
+    /* Halved from 1.5rem */
+    padding: 0.5rem 0;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--text-color);
+}
+
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 24px;
+    transition: 0.3s;
+    margin-left: 10px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+#multi-day-toggle {
+    display: none;
+}
+
+#multi-day-toggle:checked+.toggle-slider {
+    background-color: var(--accent-color);
+}
+
+#multi-day-toggle:checked+.toggle-slider:before {
+    transform: translateX(24px);
+}
+
+/* Date Range Inputs */
+.date-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.date-input-field {
+    flex: 1;
+}
+
+.date-input-field label {
+    display: block;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+    color: #666;
+}
+
+.date-input-field input {
+    cursor: pointer;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+.date-range-separator {
+    padding-bottom: 1rem;
+    font-weight: bold;
+    color: #999;
+}
+
+/* Mini Calendar Picker */
+.mini-calendar {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    padding: 10px;
+    border-radius: 8px;
+    width: 250px;
+    font-family: var(--font-gothic);
+}
+
+.mini-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.mini-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.mini-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.mini-day:hover {
+    background-color: #f0f0f0;
+}
+
+.mini-day.selected {
+    background-color: var(--accent-color);
+    color: #fff;
+}
+
+.mini-day.today {
+    border: 1px solid var(--accent-color);
+}
+
+.mini-day.other-month {
+    color: #ccc;
+}
+
+.mini-calendar-header button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.mini-day-header {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #999;
+    padding: 4px 0;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+    /* Halved from 1rem */
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-family: var(--font-gothic);
+    margin-bottom: 0.25rem;
+    /* Halved from 0.5rem */
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 1.5rem;
+}
+
+.form-actions button {
+    flex: 1;
+    /* Equal width */
+}
+
+.btn-primary {
+    background-color: #7b90d2;
+    /* Gentle Blue (Japan Trad) */
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #5a73b8;
+}
+
+.btn-danger {
+    background-color: #c94042;
+    /* Red */
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: background 0.3s;
+}
+
+.btn-danger:hover {
+    background-color: #a03032;
+}
+
+/* Color Picker Tweaks */
+.color-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+input[type="color"] {
+    width: 50px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.color-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 8px;
+    margin-top: 0.5rem;
+}
+
+.color-preset {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.2s;
+}
+
+.color-preset:hover {
+    transform: scale(1.2);
+}
+
+.color-preset.selected {
+    border-color: #333;
+    box-shadow: 0 0 0 2px #fff inset;
+}
+
+/* Category item clickable */
+.category-content-clickable {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex: 1;
+    cursor: pointer;
+}
+
+.delete-btn {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: auto;
+    /* Push to right */
+    padding: 0 0.5rem;
+}
+
+.delete-btn:hover {
+    color: var(--accent-color);
+}
+
+.category-item {
+    padding: 0.2rem 0.5rem;
+    /* Reduced padding */
+}
+
+.category-item.dragging {
+    opacity: 0;
+    /* Hide list item so only ghost is visible */
+    background: transparent;
+    border: none;
+}
+
+.category-name {
+    font-size: 0.8rem;
+    /* Adjusted to fit 13 chars */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    display: inline-block;
+    line-height: 1.2;
+}
+
+.more-events-indicator {
+    font-size: 0.65rem;
+    /* Smaller font */
+    color: #888;
+    margin-top: auto;
+    /* Push to bottom */
+    padding: 1px 2px;
+    cursor: pointer;
+    text-align: right;
+    width: 100%;
+    line-height: 1;
+}
+
+.more-events-indicator:hover {
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.event-marker.spacer {
+    background-color: transparent !important;
+    pointer-events: none;
+    box-shadow: none;
+    border: none;
+}
+
+/* Day Detail List Item */
+.day-detail-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding-right: 5px;
+    /* Scrollbar space */
+}
+
+/* Scrollbar styling for list */
+.day-detail-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.day-detail-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    /* Align to top to handle multi-line text */
+    padding: 0.8rem;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+    margin-bottom: 0.6rem;
+    border-radius: 6px;
+    border-left: 5px solid #ccc;
+    transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.detail-item:hover {
+    background-color: #fcfcfc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.detail-content {
+    flex: 1;
+    margin-right: 1rem;
+    min-width: 0;
+    /* Important for word wrapping */
+}
+
+.detail-content strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--text-color);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    /* Ensure long titles wrap */
+    overflow-wrap: break-word;
+}
+
+.detail-content span {
+    font-size: 0.75rem;
+    color: #888;
+    background: #f8f8f8;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s;
+    font-family: var(--font-gothic);
+}
+
+.btn-edit {
+    background-color: #384d98;
+    /* Blue-ish */
+}
+
+.btn-edit:hover {
+    background-color: #2a3a75;
+    transform: translateY(-1px);
+}
+
+.btn-delete {
+    background-color: #c94042;
+    /* Red-ish */
+}
+
+.btn-delete:hover {
+    background-color: #a03032;
+    transform: translateY(-1px);
+}
+
+/* =========================================
+   Intro Animation: Triple Shoji
+   ========================================= */
+
+.intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100000;
+    overflow: hidden;
+    background-color: #000;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease;
+}
+
+.intro-garden-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    transition: opacity 0.5s ease;
+}
+
+.intro-garden-bg.hidden {
+    opacity: 0;
+}
+
+.night-sky {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('garden_view.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.shoji-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    z-index: 20;
+}
+
+.shoji {
+    flex: 1;
+    height: 100%;
+    background-color: #fffaf0;
+    border: 15px solid #3e261a;
+    box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+    transition: transform 1.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    position: relative;
+    will-change: transform;
+    overflow: hidden;
+    /* Rich Japanese Base Texture with Gold Leaf Flecks */
+    background-image:
+        radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.2) 0%, transparent 2px),
+        radial-gradient(circle at 85% 20%, rgba(212, 175, 55, 0.15) 1px, transparent 3px),
+        radial-gradient(circle at 40% 70%, rgba(212, 175, 55, 0.2) 0%, transparent 2px),
+        radial-gradient(circle at 15% 90%, rgba(212, 175, 55, 0.15) 1px, transparent 3px),
+        url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+}
+
+/* Yumeari Image Integration (Right Door) */
+.yumeari-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.yumeari-image-right {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    /* Ratio-preserving scale to accommodate all cuts:
+       - Top 5% + Bottom 10% = 15% vertical cut (100/0.85 = 117.65% height)
+       - Right 15% cut (100/0.85 = 117.65% width)
+    */
+    width: 117.65%;
+    height: 117.65%;
+    object-fit: cover;
+    /* Translate(12.75%, 8.5%) relative to bottom-right anchor:
+       - Cuts literal bottom 10% (0.085 * 117.65 ≈ 10%)
+       - Cuts literal right 15% (0.1275 * 117.65 ≈ 15%)
+       - Leaves exactly 5% of height at top to be clipped.
+    */
+    transform: translate(12.75%, 8.5%);
+    opacity: 0.98;
+    filter: contrast(1.08) saturate(1.25);
+    /* Dramatic woodblock vibrancy */
+}
+
+.yumeari-image-left {
+    position: absolute;
+    left: 0;
+    top: 0;
+    /* Basic alignment: top-left of image to top-left of shoji */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.98;
+    filter: contrast(1.08) saturate(1.25);
+    /* Match right door vibrancy */
+}
+
+/* The 'Marumado' (Circular Window) - Dense & Symmetrical Grid */
+.shoji-window {
+    position: absolute;
+    width: 84vh;
+    height: 84vh;
+    top: 50%;
+    border-radius: 50%;
+    background-color: #fffaf0;
+    border: 8px solid #3e261a;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    z-index: 30;
+
+    /* Base Grid Texture */
+    background-image: url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+    background-repeat: repeat;
+}
+
+.shoji-left .shoji-window {
+    right: -42vh;
+    transform: translateY(-50%);
+    background-image:
+        linear-gradient(270deg, #3e261a 3px, transparent 3px),
+        linear-gradient(180deg, #3e261a 3px, transparent 3px),
+        url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+    background-size: 32px 100%, 100% 80px, auto;
+    background-position: right top;
+}
+
+.shoji-right .shoji-window {
+    left: -42vh;
+    transform: translateY(-50%);
+    background-image:
+        linear-gradient(90deg, #3e261a 3px, transparent 3px),
+        linear-gradient(180deg, #3e261a 3px, transparent 3px),
+        url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+    background-size: 32px 100%, 100% 80px, auto;
+    background-position: left top;
+}
+
+.shoji::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://www.transparenttextures.com/patterns/handmade-paper.png');
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Specific frame lines for mid-grid */
+.shoji-left {
+    border-right-width: 7.5px;
+    transform-origin: left;
+}
+
+.shoji-right {
+    border-left-width: 7.5px;
+    transform-origin: right;
+}
+
+/* State: Open (Garden or App) */
+.intro-open .shoji-left {
+    transform: translateX(-100%);
+}
+
+.intro-open .shoji-right {
+    transform: translateX(100%);
+}
+
+.intro-overlay.fade-out {
+    opacity: 0;
+}
