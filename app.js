@@ -1463,6 +1463,14 @@ class JapaneseCalendar {
         this.syncStatus.className = `sync-status ${type}`;
     }
 
+    // Generate a unique token from the secret key for secure storage
+    async getSyncToken(key) {
+        const msgBuffer = new TextEncoder().encode(key + "_koyomi_v1_salt");
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 32);
+    }
+
     async handleUpload() {
         const key = this.syncKeyInput.value.trim();
         if (!key) {
@@ -1473,27 +1481,30 @@ class JapaneseCalendar {
         this.updateSyncStatus('保存中...');
         localStorage.setItem('koyomi_sync_key', key);
 
-        const data = {
-            categories: this.categories,
-            events: this.events,
-            updatedAt: new Date().toISOString()
-        };
-
         try {
-            // Using kvdb.io for simple key-value storage
-            const response = await fetch(`https://kvdb.io/TPC8p6g8k8t8m8z8y8r8/${key}`, {
+            const token = await this.getSyncToken(key);
+            const data = {
+                categories: this.categories,
+                events: this.events,
+                updatedAt: new Date().toISOString()
+            };
+
+            const response = await fetch(`https://api.keyvalue.xyz/${token}/koyomi`, {
                 method: 'POST',
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' }
             });
 
             if (response.ok) {
                 this.updateSyncStatus('保存完了', 'success');
             } else {
-                throw new Error('保存に失敗しました');
+                const errText = await response.text();
+                throw new Error(`保存に失敗しました: ${errText}`);
             }
         } catch (error) {
-            console.error(error);
-            this.updateSyncStatus('エラーが発生しました', 'error');
+            console.error('Upload Error:', error);
+            this.updateSyncStatus('保存エラーが発生しました', 'error');
+            alert('保存に失敗しました。ネットワーク状況を確認してください。');
         }
     }
 
@@ -1510,26 +1521,33 @@ class JapaneseCalendar {
         localStorage.setItem('koyomi_sync_key', key);
 
         try {
-            const response = await fetch(`https://kvdb.io/TPC8p6g8k8t8m8z8y8r8/${key}`);
+            const token = await this.getSyncToken(key);
+            const response = await fetch(`https://api.keyvalue.xyz/${token}/koyomi`);
+
             if (response.status === 404) {
                 this.updateSyncStatus('データが見つかりません', 'error');
+                alert('入力されたキーに関連付けられたデータが見つかりません。');
                 return;
             }
 
             if (response.ok) {
                 const data = await response.json();
-                this.categories = data.categories;
-                this.events = data.events;
-
-                this.saveData();
-                this.render();
-                this.updateSyncStatus('読み込み完了', 'success');
+                if (data && data.categories && data.events) {
+                    this.categories = data.categories;
+                    this.events = data.events;
+                    this.saveData();
+                    this.render();
+                    this.updateSyncStatus('読み込み完了', 'success');
+                } else {
+                    throw new Error('データの形式が正しくありません');
+                }
             } else {
                 throw new Error('読み込みに失敗しました');
             }
         } catch (error) {
-            console.error(error);
+            console.error('Download Error:', error);
             this.updateSyncStatus('エラーが発生しました', 'error');
+            alert('同期データの読み込みに失敗しました。');
         }
     }
 }
